@@ -1,38 +1,27 @@
 use std::io::{self, Write};
-use gtfo_codecracker::{load_words, match_pattern};
+use gtfo_codecracker::{load_words_from_str, match_pattern};
+
+// Embed the CSV directly into the binary
+const CSV_DATA: &str = include_str!("../data/gtfo-possible-codes.csv");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let words = load_words("gtfo-possible-codes.csv")?;
-    println!("Loaded {} words.", words.len());
-    println!("Type '#' to exit.");
+    let words = load_words_from_str(CSV_DATA)?;
 
     loop {
-        print!("Enter 4-letter pattern (use '-' as wildcard, e.g., a--e): ");
+        print!("Enter 4-letter pattern (use '-' as wildcard, '#' to quit): ");
         io::stdout().flush()?;
+
         let mut pattern = String::new();
         io::stdin().read_line(&mut pattern)?;
         let pattern = pattern.trim().to_lowercase();
 
         if pattern == "#" {
-            println!("Exiting program.");
+            println!("Exiting...");
             break;
         }
 
         if pattern.len() != 4 {
-            println!("Pattern must be exactly 4 letters.");
-            continue;
-        }
-
-        let invalid_chars: Vec<char> = pattern
-            .chars()
-            .filter(|c| c != &'-' && !('a'..='z').contains(c))
-            .collect();
-
-        if !invalid_chars.is_empty() {
-            println!(
-                "Invalid characters detected: {}. Only letters a-z or '-' are allowed.",
-                invalid_chars.iter().map(|c| c.to_string()).collect::<Vec<_>>().join(", ")
-            );
+            println!("Pattern must be exactly 4 characters.");
             continue;
         }
 
