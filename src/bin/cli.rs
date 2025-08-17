@@ -2,7 +2,7 @@ use std::io::{self, Write};
 use gtfo_codecracker::{load_words_from_str, match_pattern};
 
 // Embed the CSV directly into the binary
-const CSV_DATA: &str = include_str!("../data/gtfo-possible-codes.csv");
+const CSV_DATA: &str = include_str!("../../data/gtfo-possible-codes.csv");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let words = load_words_from_str(CSV_DATA)?;
