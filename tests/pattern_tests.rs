@@ -8,7 +8,7 @@ fn test_all_words_match_themselves() {
     let words = load_words_from_str(CSV_DATA).expect("Failed to load CSV");
 
     for word in &words {
-        let result = match_pattern(&word, &words);  // <-- note &word
+        let result = match_pattern(&word, &words); 
         assert!(result.contains(word), "Word '{}' should match itself", word);
     }
 }

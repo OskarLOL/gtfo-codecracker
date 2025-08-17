@@ -2,8 +2,10 @@
 
 use eframe::{egui, epaint::image};
 use gtfo_codecracker::{load_words_from_str, match_pattern};
-use ::image::GenericImageView;    // for .dimensions()
-use ::image::load_from_memory;    // <-- this is the missing import
+use ::image::GenericImageView;    
+use ::image::load_from_memory; 
+use egui::ScrollArea;
+
 
 
 const CSV_DATA: &str = include_str!("../../../gtfo-codecracker/data/gtfo-possible-codes.csv");
@@ -56,9 +58,18 @@ impl eframe::App for CodeCrackerApp {
                 ui.label("No matches yet.");
             } else {
                 ui.label("Matching words:");
-                for word in &self.results {
-                    ui.label(word);
-                }
+                ScrollArea::vertical()
+                    .max_height(720.0) // set a max height for the scroll area
+                    .show(ui, |ui| {
+                    for word in &self.results {
+                        ui.horizontal(|ui| {
+                            ui.label(egui::RichText::new(word).size(20.0));
+                            if ui.button("📋 Copy").clicked() {
+                                ui.output_mut(|o| o.copied_text = word.clone());
+                            }
+                        });
+                    }
+                    });
             }
         });
     }
