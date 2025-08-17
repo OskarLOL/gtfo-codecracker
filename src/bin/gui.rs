@@ -1,5 +1,10 @@
-use eframe::{egui, WindowAttributes};
+#![windows_subsystem = "windows"]
+
+use eframe::{egui, epaint::image};
 use gtfo_codecracker::{load_words_from_str, match_pattern};
+use ::image::GenericImageView;    // for .dimensions()
+use ::image::load_from_memory;    // <-- this is the missing import
+
 
 const CSV_DATA: &str = include_str!("../../../gtfo-codecracker/data/gtfo-possible-codes.csv");
 
@@ -28,18 +33,22 @@ impl eframe::App for CodeCrackerApp {
             ui.horizontal(|ui| {
                 ui.label("Pattern (use '-' as wildcard):");
 
-                if ui
-                    .text_edit_singleline(&mut self.pattern)
-                    .lost_focus()
-                    && ui.input(|i| i.key_pressed(egui::Key::Enter))
-                {
+                let response = ui.add_sized(
+          egui::vec2(ui.spacing().interact_size.x * 0.5, 20.0), // ~4 chars wide
+            egui::TextEdit::singleline(&mut self.pattern),
+               );
+                
+                if response.changed() {
                     self.results = match_pattern(&self.pattern, &self.words);
                 }
+
+                if ui.button("Crack").clicked() {
+                    self.results = match_pattern(&self.pattern, &self.words);
+                }
+
             });
 
-            if ui.button("Crack").clicked() {
-                self.results = match_pattern(&self.pattern, &self.words);
-            }
+            
 
             ui.separator();
 
@@ -56,10 +65,26 @@ impl eframe::App for CodeCrackerApp {
 }
 
 
+
 fn main() -> Result<(), eframe::Error> {
-    let size = egui::vec2(300.0, 800.0);
+
+    let icon_bytes = include_bytes!("../../../gtfo-codecracker/data/exec-brute-force.png");
+    
+    let image = load_from_memory(icon_bytes)
+        .expect("Failed to load icon")
+        .into_rgba8();
+
+    let (width, height) = image.dimensions();
+
+    let icon = egui::IconData {
+        rgba: image.into_raw(),
+        width,
+        height,
+    };
+
+    let size = egui::vec2(275.0, 800.0);
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size(size),
+        viewport: egui::ViewportBuilder::default().with_inner_size(size).with_icon(icon),
         ..Default::default()
     };
     
