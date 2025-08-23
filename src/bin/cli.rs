@@ -1,5 +1,5 @@
-use std::io::{self, Write};
 use gtfo_codecracker::{load_words_from_str, match_pattern};
+use std::io::{self, Write};
 
 // Embed the CSV directly into the binary
 const CSV_DATA: &str = include_str!("../../data/gtfo-possible-codes.csv");
