@@ -38,6 +38,12 @@ impl Default for CodeCrackerApp {
 
 impl eframe::App for CodeCrackerApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+
+        if ctx.input(|i| i.key_pressed(egui::Key::F11)) {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
+            // ctx.send_viewport_cmd(egui::ViewportCommand::RequestUserAttention()));
+        }
+
         let focused = ctx.input(|i| i.viewport().focused);
         
         if self.pattern.trim().is_empty(){
@@ -70,7 +76,7 @@ impl eframe::App for CodeCrackerApp {
                 ui.heading(RichText::new("GTFO Code Cracker").size(25.0).color(color));
 
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Pattern (e.g. a--e):").size(22.0));
+                    ui.label(RichText::new("Pattern (e.g. l-a-):").size(22.0));
 
                     let response = ui.add_sized(
                         egui::vec2(ui.spacing().interact_size.x * 1.0, 30.0), // ~4 chars wide
@@ -117,14 +123,15 @@ impl eframe::App for CodeCrackerApp {
             });
         } else {
             ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(UI_SIZE_COLLAPSED));
-            ctx.send_viewport_cmd(egui::ViewportCommand::Transparent(true));
+            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
+            ctx.send_viewport_cmd(egui::ViewportCommand::Minimized(false));
 
             egui::CentralPanel::default().show(ctx, |ui| {
-                ui.centered_and_justified(|ui| {
+                // ui.centered_and_justified(|ui| {
                     if let Some(icon) = &self.icon {
                         ui.image(icon); // use &TextureHandle
                     }
-                });
+                // });
             });
         }
 
@@ -132,9 +139,7 @@ impl eframe::App for CodeCrackerApp {
         /*             Window Focus doesn't work yet. But im still trying             */
         /* -------------------------------------------------------------------------- */
 
-        // if ctx.input(|i| i.key_pressed(egui::Key::F)) {
-        //     ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
-        // }
+        
 
 
     }
@@ -147,7 +152,7 @@ fn main() -> Result<(), eframe::Error> {
         .into_rgba8();
 
     let (width, height) = image.dimensions();
-    let pixels = image.clone().into_raw(); // clone before consuming
+    let pixels = image.into_raw(); // clone before consuming
 
     let icon = egui::IconData {
         rgba: pixels.clone(), // this can be reused
@@ -161,7 +166,9 @@ fn main() -> Result<(), eframe::Error> {
             .with_icon(icon)
             .with_resizable(false)
             .with_always_on_top()
-            .with_min_inner_size(UI_SIZE_COLLAPSED),
+            .with_min_inner_size(UI_SIZE_COLLAPSED)
+            .with_minimize_button(false)
+            .with_maximize_button(false),
         ..Default::default()
     };
 
@@ -174,7 +181,7 @@ fn main() -> Result<(), eframe::Error> {
             let texture = cc.egui_ctx.load_texture(
                 "app_icon",
                 egui::ColorImage::from_rgba_unmultiplied(size, &pixels),
-                Default::default(),
+                egui::TextureOptions::LINEAR,
             );
 
             Ok(Box::new(CodeCrackerApp {
